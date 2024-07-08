@@ -15,6 +15,7 @@ class Userinfo extends Component {
                     </div>
                 </div>
             </div>
+            
         );
     }
 }
