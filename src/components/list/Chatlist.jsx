@@ -3,7 +3,7 @@ import React, { useState } from "react";
 const Chatlist = () => {
   const [addMode, setAddMode] = useState(true);
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div className="flex flex-col h-full overflow-hidden rounded-bl-xl">
       <div className="flex py-1 px-2 gap-2">
         <div // Search BAR
           className="relative rounded-md shadow-sm group"

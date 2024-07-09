@@ -5,7 +5,7 @@ import Details from "./components/detail/Details";
 const App = () => {
   return (
     <div className="flex items-center justify-center bg-gradient-to-t from-[#08203e] to-[#557c93] h-dvh w-dvw">
-      <div className="overflow-hidden h-5/6 w-5/6 max-w-[1000px] min-h-[500px] bg-black/50 backdrop-blur-md backdrop-saturate-200 rounded-xl shadow-lg flex">
+      <div className="h-5/6 w-5/6 max-w-full min-w-[40rem] mx-8 min-h-[500px] bg-black/50 backdrop-blur-md backdrop-saturate-200 rounded-xl shadow-lg flex">
         <List />
         <Chat />
         <Details />

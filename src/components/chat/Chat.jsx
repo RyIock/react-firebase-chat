@@ -2,17 +2,18 @@ import React, { Component, useState } from "react";
 import EmojiPicker from "emoji-picker-react";
 
 const Chat = () => {
-    const [open, setOpen] = useState(false); //Open and Close Emoji Picker
-    const [text, setText] = useState("");
+  const [open, setOpen] = useState(false); //Open and Close Emoji Picker
+  const [text, setText] = useState("");
+ 
 
-    const handleEmoji = e =>{
-        setText((prev) => prev + e.emoji);
-        setOpen(false)
-    }
+  const handleEmoji = (e) => {
+    setText((prev) => prev + e.emoji);
+    setOpen(false);
+  };
 
-    console.log(text)
+  console.log(text);
   return (
-    <div className="flex flex-col flex-auto border-x-2 border-[#18405f]">
+    <div className="flex flex-col flex-auto border-l-2 border-[#18405f]">
       <div //Top Bar
         className="flex border-b-2 border-[#18405f] shadow-lg"
       >
@@ -66,9 +67,46 @@ const Chat = () => {
           </svg>
         </div>
       </div>
+
+
       <div // Center
-        className="flex-1"
-      ></div>
+        className="flex flex-col flex-1 overflow-scroll gap-5 *:max-w-[70%] *:flex *:gap-5"
+      >
+        <div className="self-end ">
+            <div className="texts mt-5 mr-5">
+                <img src="src\assets\Headshot_Square.png" alt="" className="w-full h-72 object-cover rounded-lg mb-1" />
+                <p className="bg-sky-300 p-4 rounded-md shadow-sm">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dolorum aperiam illo vitae fuga ea culpa recusandae. Expedita id dolor neque qui quis, dolore nobis ullam eveniet sint dicta ex natus.</p>
+                <span className="text-xs ">1 min ago</span>
+            </div>
+        </div>
+
+        <div className="message">
+            <img src="src\assets\avatar.png" alt="" className="size-8 rounded-full object-cover ml-4 " />
+            <div className="texts">
+                <p className="p-4 rounded-md  bg-black/25 shadow-sm">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dolorum aperiam illo vitae fuga ea culpa recusandae. Expedita id dolor neque qui quis, dolore nobis ullam eveniet sint dicta ex natus.</p>
+                <span className="text-xs ">1 min ago</span>
+            </div>
+        </div>
+
+        <div className="self-end ">
+            <div className="texts mt-5 mr-5">
+                <p className="bg-sky-300 p-4 rounded-md shadow-sm">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dolorum aperiam illo vitae fuga ea culpa recusandae. Expedita id dolor neque qui quis, dolore nobis ullam eveniet sint dicta ex natus.</p>
+                <span className="text-xs ">1 min ago</span>
+            </div>
+        </div>
+
+        <div className="message">
+            <img src="src\assets\avatar.png" alt="" className="size-8 rounded-full object-cover ml-4 " />
+            <div className="texts">
+                <p className="p-4 rounded-md  bg-black/25 shadow-sm">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dolorum aperiam illo vitae fuga ea culpa recusandae. Expedita id dolor neque qui quis, dolore nobis ullam eveniet sint dicta ex natus.</p>
+                <span className="text-xs ">1 min ago</span>
+            </div>
+        </div>
+
+      </div>
+
+
+
       <div //Bottom Bar
         className="flex items-center justify-between border-t-2 border-[#18405f] shadow-lg"
       >
@@ -111,21 +149,20 @@ const Chat = () => {
         <input
           type="text"
           value={text}
-          onChange={e=>setText(e.target.value)}
+          onChange={(e) => setText(e.target.value)}
           placeholder="Type a message..."
           className="bg-black/35 flex-1 border-none outline-none focus:outline-none text-white rounded-lg p-1 pl-3 m-2 placeholder:text-gray-700 group-hover:placeholder:text-gray-800 focus:placeholder:text-gray-800 sm:text-sm sm:leading-6"
         />
         <div //emoji and Emoji Onlick
-          className="*:size-6"
-          onClick={() => 
-            setOpen((prev) => !prev)
-          }
+          className="*:size-6 relative"
+          onClick={() => setOpen((prev) => !prev)}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
             fill="currentColor"
-            className="size-6"
+            data-open={open}
+            className="size-6 data-[open=true]:fill-slate-500"
           >
             <path
               fillRule="evenodd"
@@ -133,8 +170,15 @@ const Chat = () => {
               clipRule="evenodd"
             />
           </svg>
-          <div className=" absolute bottom-60">
-          <EmojiPicker on open={open} onEmojiClick={handleEmoji} />
+          <div className=" absolute bottom-[23rem] right-[17rem]">
+            <EmojiPicker
+              on
+              open={open}
+              onEmojiClick={handleEmoji}
+              theme="auto"
+              width={300}
+              height={350}
+            />
           </div>
         </div>
         <button className="mx-3 py-1 px-3 rounded-md shadow-sm text-sm font-semibold bg-sky-600 hover:bg-sky-500">
