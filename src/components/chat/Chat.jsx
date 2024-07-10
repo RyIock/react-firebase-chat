@@ -1,14 +1,19 @@
-import React, { Component, useState } from "react";
+import React, { Component, useEffect, useRef, useState } from "react";
 import EmojiPicker from "emoji-picker-react";
 
 const Chat = () => {
   const [open, setOpen] = useState(false); //Open and Close Emoji Picker
-  const [text, setText] = useState("");
+  const [text, setText] = useState(""); //Adds Emoji's to Textbox
  
+  const endRef = useRef(null)
+
+  useEffect(()=>{
+    endRef.current?.scrollIntoView({behavior:"smooth"})
+  })
 
   const handleEmoji = (e) => {
     setText((prev) => prev + e.emoji);
-    setOpen(false);
+    
   };
 
   console.log(text);
@@ -102,6 +107,8 @@ const Chat = () => {
                 <span className="text-xs ">1 min ago</span>
             </div>
         </div>
+        
+        <div ref={endRef} className="end"></div>
 
       </div>
 
