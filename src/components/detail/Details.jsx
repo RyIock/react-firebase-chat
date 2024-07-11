@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { auth } from "../../lib/Firebase"; // Used to logout.
 
 class Details extends Component {
   state = {};
@@ -200,7 +201,7 @@ class Details extends Component {
             </div>
           </div>
         <button className="bg-red-500/50 hover:bg-red-900 rounded-md font-bold text-center py-1 mt-auto">Block User</button>
-        <button className="bg-sky-400/50 hover:bg-sky-900 rounded-md font-bold text-center py-1">Logout</button>
+        <button onClick={()=>auth.signOut()} className="bg-sky-400/50 hover:bg-sky-900 rounded-md font-bold text-center py-1">Logout</button>
         </div>
       </div>
     );

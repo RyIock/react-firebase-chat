@@ -87,7 +87,7 @@ const Login = () => {
         className="data-[creation=true]:hidden flex flex-col flex-auto justify-center items-center"
       >
         <h2 className="font-bold text-2xl mb-6">Welcome back,</h2>
-        <form className="flex flex-col">
+        <form onSubmit={handleLogin} className="flex flex-col">
           <input
             className="focus:outline-none mb-3 bg-black/25 p-2 font-semibold placeholder-gray-700 focus:placeholder-gray-800 rounded-lg shadow-sm appearance-none"
             type="text"
