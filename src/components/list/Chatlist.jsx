@@ -1,7 +1,14 @@
 import React, { useState } from "react";
+import addUser from "./addUser/addUser";
+import AddUser from "./addUser/addUser";
 
 const Chatlist = () => {
+  
   const [addMode, setAddMode] = useState(true);
+
+
+
+
   return (
     <div className="flex flex-col h-full overflow-hidden rounded-bl-xl">
       <div className="flex py-1 px-2 gap-2">
@@ -170,6 +177,7 @@ const Chatlist = () => {
         </div>   
              
       </div>
+{addMode || <AddUser />}
     </div>
   );
 };
