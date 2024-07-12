@@ -1,13 +1,40 @@
-import React, { useState } from "react";
-import addUser from "./addUser/addUser";
+import React, { useEffect, useState } from "react";
 import AddUser from "./addUser/addUser";
+import useUserStore from "../../lib/userStore";
+import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { database } from "../../lib/Firebase";
 
 const Chatlist = () => {
-  
   const [addMode, setAddMode] = useState(true);
+  const [chats, setChats] = useState([]);
 
+  const { currentUser } = useUserStore();
 
+ /*  useEffect(() => {
+    const unSub = onSnapshot(
+      doc(database, "usechats", currentUser.id),
+      async (res) => {
+        const items = res.data().chats;
 
+        const promises = items.map(async (item) => {
+          const userDocRef = doc(database, "users", item.receiverId);
+          const userDocSnap = await getDoc(userDocRef);
+
+          const user = userDocSnap.data();
+
+          return { ...item, user };
+        });
+
+        const chatData = await Promise.all(promises);
+
+        setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
+      }
+    );
+
+    return () => {
+      unSub();
+    };
+  }, [currentUser.id]); */
 
   return (
     <div className="flex flex-col h-full overflow-hidden rounded-bl-xl">
@@ -62,122 +89,19 @@ const Chatlist = () => {
         </button>
       </div>
       <div // Friends List
-      className="overflow-auto *:flex *:items-center *:gap-6 *:p-2 *:cursor-pointer *:border-b-2 *:border-[#18405f]">
-        <div className="">
+        className="overflow-auto *:flex *:items-center *:gap-6 *:p-2 *:cursor-pointer *:border-b-2 *:border-[#18405f]"
+      >
+        {chats.map((chat) => (
+          <div className="" key={chat.chatId}>
             <img src="src\assets\avatar.png" className="h-10 rounded-full" />
             <div className="texts">
-                <span className="text-base font-semibold">Adam Doe</span>
-                <p className="text-sm">I like cats!</p>
+              <span className="text-base font-semibold">Adam Doe</span>
+              <p className="text-sm">{chat.lastMessage}</p>
             </div>
-        </div>   
-        <div className="">
-            <img src="src\assets\avatar.png" className="h-10 rounded-full" />
-            <div className="texts">
-                <span className="text-base font-semibold">Adam Doe</span>
-                <p className="text-sm">I like cats!</p>
-            </div>
-        </div>   
-        <div className="">
-            <img src="src\assets\avatar.png" className="h-10 rounded-full" />
-            <div className="texts">
-                <span className="text-base font-semibold">Adam Doe</span>
-                <p className="text-sm">I like cats!</p>
-            </div>
-        </div>   
-        <div className="">
-            <img src="src\assets\avatar.png" className="h-10 rounded-full" />
-            <div className="texts">
-                <span className="text-base font-semibold">Adam Doe</span>
-                <p className="text-sm">I like cats!</p>
-            </div>
-        </div>   
-        <div className="">
-            <img src="src\assets\avatar.png" className="h-10 rounded-full" />
-            <div className="texts">
-                <span className="text-base font-semibold">Adam Doe</span>
-                <p className="text-sm">I like cats!</p>
-            </div>
-        </div>   
-        <div className="">
-            <img src="src\assets\avatar.png" className="h-10 rounded-full" />
-            <div className="texts">
-                <span className="text-base font-semibold">Adam Doe</span>
-                <p className="text-sm">I like cats!</p>
-            </div>
-        </div>   
-        <div className="">
-            <img src="src\assets\avatar.png" className="h-10 rounded-full" />
-            <div className="texts">
-                <span className="text-base font-semibold">Adam Doe</span>
-                <p className="text-sm">I like cats!</p>
-            </div>
-        </div>   
-        <div className="">
-            <img src="src\assets\avatar.png" className="h-10 rounded-full" />
-            <div className="texts">
-                <span className="text-base font-semibold">Adam Doe</span>
-                <p className="text-sm">I like cats!</p>
-            </div>
-        </div>   
-        <div className="">
-            <img src="src\assets\avatar.png" className="h-10 rounded-full" />
-            <div className="texts">
-                <span className="text-base font-semibold">Adam Doe</span>
-                <p className="text-sm">I like cats!</p>
-            </div>
-        </div>   
-        <div className="">
-            <img src="src\assets\avatar.png" className="h-10 rounded-full" />
-            <div className="texts">
-                <span className="text-base font-semibold">Adam Doe</span>
-                <p className="text-sm">I like cats!</p>
-            </div>
-        </div>   
-        <div className="">
-            <img src="src\assets\avatar.png" className="h-10 rounded-full" />
-            <div className="texts">
-                <span className="text-base font-semibold">Adam Doe</span>
-                <p className="text-sm">I like cats!</p>
-            </div>
-        </div>   
-        <div className="">
-            <img src="src\assets\avatar.png" className="h-10 rounded-full" />
-            <div className="texts">
-                <span className="text-base font-semibold">Adam Doe</span>
-                <p className="text-sm">I like cats!</p>
-            </div>
-        </div>   
-        <div className="">
-            <img src="src\assets\avatar.png" className="h-10 rounded-full" />
-            <div className="texts">
-                <span className="text-base font-semibold">Adam Doe</span>
-                <p className="text-sm">I like cats!</p>
-            </div>
-        </div>   
-        <div className="">
-            <img src="src\assets\avatar.png" className="h-10 rounded-full" />
-            <div className="texts">
-                <span className="text-base font-semibold">Adam Doe</span>
-                <p className="text-sm">I like cats!</p>
-            </div>
-        </div>   
-        <div className="">
-            <img src="src\assets\avatar.png" className="h-10 rounded-full" />
-            <div className="texts">
-                <span className="text-base font-semibold">Adam Doe</span>
-                <p className="text-sm">I like cats!</p>
-            </div>
-        </div>   
-        <div className="">
-            <img src="src\assets\avatar.png" className="h-10 rounded-full" />
-            <div className="texts">
-                <span className="text-base font-semibold">Adam Doe</span>
-                <p className="text-sm">I like cats!</p>
-            </div>
-        </div>   
-             
+          </div>
+        ))}
       </div>
-{addMode || <AddUser />}
+      {addMode || <AddUser />}
     </div>
   );
 };

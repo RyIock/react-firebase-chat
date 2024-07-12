@@ -20,6 +20,7 @@ const App = () => {
       }
     });
 
+
     return () => {
       unSub();
     };
@@ -36,7 +37,7 @@ const App = () => {
       <div className="h-5/6 w-5/6 max-w-full min-w-[40rem] mx-8 min-h-[500px] bg-black/50 backdrop-blur-md backdrop-saturate-200 rounded-xl shadow-lg flex">
         {currentUser ? (
           <>
-            <List />
+            <List/>
             <Chat />
             <Details />
           </>

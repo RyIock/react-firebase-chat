@@ -36,8 +36,11 @@ const Login = () => {
     try {
       const res = await createUserWithEmailAndPassword(auth, email, password);
 
-      const imgUrl = await upload(avatar.file)
+      const imgUrl = "https://firebasestorage.googleapis.com/v0/b/reactchat-a11ca.appspot.com/o/images%2Favatar.png?alt=media&token=6a6c65ac-5d63-4b10-9247-38f3ae71be54"
 
+      if(avatar.file){
+        imgUrl = await upload(avatar.file)
+      }
       await setDoc(doc(database, "users", res.user.uid), {
         username,
         email,
