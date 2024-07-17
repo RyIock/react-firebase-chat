@@ -6,8 +6,6 @@ export default {
   ],
   theme: {
     extend: {
-      
-      'primary': '--var(primary-color)'
 
     },
   },

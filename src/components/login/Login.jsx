@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import firebase from "firebase/compat/app";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 import { auth, database } from "../../lib/Firebase";
 import { doc, setDoc } from "firebase/firestore";
@@ -36,11 +35,13 @@ const Login = () => {
     try {
       const res = await createUserWithEmailAndPassword(auth, email, password);
 
-      const imgUrl = "https://firebasestorage.googleapis.com/v0/b/reactchat-a11ca.appspot.com/o/images%2Favatar.png?alt=media&token=6a6c65ac-5d63-4b10-9247-38f3ae71be54"
+      let imgUrl = "https://firebasestorage.googleapis.com/v0/b/reactchat-a11ca.appspot.com/o/images%2Favatar.png?alt=media&token=89142e87-24f6-4b75-bc01-69d3e8e7c657"
+        //temporary 
 
       if(avatar.file){
         imgUrl = await upload(avatar.file)
       }
+
       await setDoc(doc(database, "users", res.user.uid), {
         username,
         email,
@@ -98,7 +99,7 @@ const Login = () => {
             name="email"
           />
           <input
-            className="focus:outline-none mb-3 bg-black/25 p-2 font-semibold placeholder-gray-700 focus:placeholder-gray-800 rounded-lg shadow-sm appearance-none"
+            className=" focus:outline-none mb-3 bg-black/25 p-2 font-semibold placeholder-gray-700 focus:placeholder-gray-800 rounded-lg shadow-sm appearance-none"
             type="password"
             placeholder="Password"
             name="password"
@@ -160,17 +161,21 @@ const Login = () => {
           />
           <div className="border-black/10 border-2 mb-3"></div>
           <input
-            type="text"
+            type="email"
             placeholder="Email"
             name="email"
-            className="focus:outline-none mb-3 bg-black/25 p-2 font-semibold placeholder-gray-700 focus:placeholder-gray-800 rounded-lg shadow-sm appearance-none"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            name="password"
-            className="focus:outline-none mb-3 bg-black/25 p-2 font-semibold placeholder-gray-700 focus:placeholder-gray-800 rounded-lg shadow-sm appearance-none"
-          />
+            className=" invalid:ring-1 invalid:ring-inset invalid:ring-red-500 focus:outline-none mb-3 bg-black/25 p-2 font-semibold placeholder-gray-700 focus:placeholder-gray-800 rounded-lg shadow-sm appearance-none"
+            />
+            <div className="flex flex-col items-center relative">
+                <input
+                  type="password"
+                  placeholder="Password"
+                  name="password"
+                  className="peer invalid:ring-1 invalid:ring-inset invalid:ring-red-500 invalid:focus:text-red-300 invalid:text-black/50 focus:outline-none mb-3 bg-black/25 p-2 font-semibold placeholder-gray-700 focus:placeholder-gray-800 rounded-lg shadow-sm appearance-none"
+                  pattern='^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{6,}$' //regex  Minimum 6 characters, at least one letter and one number:
+                />
+                <div className="hidden peer-invalid:block peer-invalid:text-red-500 peer-invalid:peer-focus:hidden pointer-events-none text-xs absolute justify-self-center pt-[3px] pl-2">Min. 6 characters, at least one letter and one number</div>
+            </div>
           <button disabled={loading} className="items-center disabled:cursor-not-allowed disabled:bg-gray-500/90 rounded-md bg-sky-500 px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-sky-950 hover:bg-sky-600">
            {loading ? "Loading" : "Sign Up"}
           </button>

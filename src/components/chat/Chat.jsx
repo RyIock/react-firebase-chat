@@ -15,8 +15,6 @@ const Chat = () => {
     setText((prev) => prev + e.emoji);
     
   };
-
-  console.log(text);
   return (
     <div className="flex flex-col flex-auto border-l-2 border-[#18405f]">
       <div //Top Bar

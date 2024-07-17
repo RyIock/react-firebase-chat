@@ -5,36 +5,71 @@ import { doc, getDoc, onSnapshot } from "firebase/firestore";
 import { database } from "../../lib/Firebase";
 
 const Chatlist = () => {
-  const [addMode, setAddMode] = useState(true);
+  const [addMode, setAddMode] = useState(false); 
   const [chats, setChats] = useState([]);
 
-  const { currentUser } = useUserStore();
+  const handleUserAdded = (newChat) => {
+    setChats(prevChats => [...prevChats, newChat]);
+    setAddMode(false);
+  };
 
- /*  useEffect(() => {
-    const unSub = onSnapshot(
-      doc(database, "usechats", currentUser.id),
-      async (res) => {
-        const items = res.data().chats;
+  const currentUser  = useUserStore((state) => state.currentUser); //Obtain the zustand state managed "useUserStore"
+  //const { currentUser } = useUserStore();
+
+  
+  useEffect(() => { //  https://firebase.google.com/docs/firestore/query-data/listen
+
+    if (!currentUser || !currentUser.id) { //ADDED
+      console.error("Current user or user ID is undefined");
+      return;
+    }
+
+    const unSub = onSnapshot(doc(database, "userchats", currentUser.id), async (response) => {
+
+      if (!response.exists()) { //ADDED
+        console.log("No user chats found");
+        setChats([]);
+        return;
+      }
+
+        const items = response.data().chats;
 
         const promises = items.map(async (item) => {
-          const userDocRef = doc(database, "users", item.receiverId);
+          if (!item || !item.receiverId) { //ADDED
+            console.warn("Invalid chat item:", item);
+            return null;
+          }
+          try{ //ADDED
+          const userDocRef = doc(database, "users", item.receiverId); // https://firebase.google.com/docs/firestore/query-data/get-data
           const userDocSnap = await getDoc(userDocRef);
+
+          if (!userDocSnap.exists()) { //ADDED
+            console.warn(`User ${item.receiverId} not found`);
+            return null;
+          }
 
           const user = userDocSnap.data();
 
-          return { ...item, user };
+          return { ...item, user }; }
+          catch (err) { //ADDED
+            console.error(`Error fetching user ${item.receiverId}:`, err);
+            return null;
+          }
         });
 
         const chatData = await Promise.all(promises);
+        const validChats = chatData.filter(Boolean); //ADDED 
 
-        setChats(chatData.sort((a, b) => b.updatedAt - a.updatedAt));
+        setChats(validChats.sort((a, b) => b.updatedAt - a.updatedAt));
+      }, (error) => {
+        console.error("Error in onSnapshot:", error);
       }
     );
 
     return () => {
       unSub();
     };
-  }, [currentUser.id]); */
+  }, [currentUser.id]); 
 
   return (
     <div className="flex flex-col h-full overflow-hidden rounded-bl-xl">
@@ -73,7 +108,7 @@ const Chatlist = () => {
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
-            data-addmode={addMode}
+            data-addmode={!addMode}
             className="size-6 fill-white group-hover:fill-gray-300 w-5 h-5 data-[addmode=false]:hidden"
           >
             <path d="M5.25 6.375a4.125 4.125 0 1 1 8.25 0 4.125 4.125 0 0 1-8.25 0ZM2.25 19.125a7.125 7.125 0 0 1 14.25 0v.003l-.001.119a.75.75 0 0 1-.363.63 13.067 13.067 0 0 1-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 0 1-.364-.63l-.001-.122ZM18.75 7.5a.75.75 0 0 0-1.5 0v2.25H15a.75.75 0 0 0 0 1.5h2.25v2.25a.75.75 0 0 0 1.5 0v-2.25H21a.75.75 0 0 0 0-1.5h-2.25V7.5Z" />
@@ -81,7 +116,7 @@ const Chatlist = () => {
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
-            data-addmode={addMode}
+            data-addmode={!addMode}
             className="size-6 fill-white group-hover:-gray-300 w-5 h-5 data-[addmode=true]:hidden"
           >
             <path d="M10.375 2.25a4.125 4.125 0 1 0 0 8.25 4.125 4.125 0 0 0 0-8.25ZM10.375 12a7.125 7.125 0 0 0-7.124 7.247.75.75 0 0 0 .363.63 13.067 13.067 0 0 0 6.761 1.873c2.472 0 4.786-.684 6.76-1.873a.75.75 0 0 0 .364-.63l.001-.12v-.002A7.125 7.125 0 0 0 10.375 12ZM16 9.75a.75.75 0 0 0 0 1.5h6a.75.75 0 0 0 0-1.5h-6Z" />
@@ -96,12 +131,16 @@ const Chatlist = () => {
             <img src="src\assets\avatar.png" className="h-10 rounded-full" />
             <div className="texts">
               <span className="text-base font-semibold">Adam Doe</span>
-              <p className="text-sm">{chat.lastMessage}</p>
+              <p className="text-sm">{chat.lastMessage || "No messages"}</p>
             </div>
           </div>
         ))}
       </div>
-      {addMode || <AddUser />}
+      {addMode ? (
+        <AddUser onUserAdded={handleUserAdded} />
+      ) : (
+        <button className="text-sm" onClick={() => setAddMode(true)}>Add User +</button>
+      )}
     </div>
   );
 };
