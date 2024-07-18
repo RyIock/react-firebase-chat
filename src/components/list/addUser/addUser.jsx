@@ -5,8 +5,9 @@ import useUserStore from "../../../lib/userStore";
 
 const AddUser = ({ onUserAdded /* Added */ }) => {
 
-    const {currentUser} = useUserStore();
-
+    const currentUser = useUserStore((state) => state.currentUser);
+    //const {currentUser} = useUserStore();
+    
     const [user, setUser] = useState(null)
 
     const handleSearch = async e =>{
@@ -49,7 +50,7 @@ const AddUser = ({ onUserAdded /* Added */ }) => {
                 chats:arrayUnion({
                     chatId: newChatRef.id,
                     lastMessage:"",
-                    recieverId: currentUser.id,
+                    receiverId: currentUser.id,
                     updatedAt: Date.now(),
                 })
             });
@@ -58,7 +59,7 @@ const AddUser = ({ onUserAdded /* Added */ }) => {
                 chats:arrayUnion({
                     chatId: newChatRef.id,
                     lastMessage:"",
-                    recieverId: user.id,
+                    receiverId: user.id,
                     updatedAt: Date.now(),
                 })
             });

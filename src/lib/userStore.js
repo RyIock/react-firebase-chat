@@ -10,10 +10,9 @@ const useUserStore = create((set) => ({
     if (!uid) {
       console.log("No UID provided, setting currentUser to null");
       set({ currentUser: null, isLoading: false });
-     return;
-    } 
+      return;
+    }
     try {
-
       console.log("Fetching user info for UID:", uid);
 
       const docRef = doc(database, "users", uid);
@@ -28,7 +27,7 @@ const useUserStore = create((set) => ({
       }
     } catch (err) {
       console.error("Error fetching user info:", err);
-     set({ currentUser: null, isLoading: false });
+      set({ currentUser: null, isLoading: false });
     }
   },
 }));

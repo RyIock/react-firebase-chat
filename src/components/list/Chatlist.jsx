@@ -8,7 +8,7 @@ const Chatlist = () => {
   const [addMode, setAddMode] = useState(false); 
   const [chats, setChats] = useState([]);
 
-  const handleUserAdded = (newChat) => {
+  const handleUserAdded = (newChat) => { //Added
     setChats(prevChats => [...prevChats, newChat]);
     setAddMode(false);
   };
@@ -16,25 +16,16 @@ const Chatlist = () => {
   const currentUser  = useUserStore((state) => state.currentUser); //Obtain the zustand state managed "useUserStore"
   //const { currentUser } = useUserStore();
 
-  
-  useEffect(() => { //  https://firebase.google.com/docs/firestore/query-data/listen
 
-    if (!currentUser || !currentUser.id) { //ADDED
-      console.error("Current user or user ID is undefined");
-      return;
-    }
+  useEffect(() => { //  https://firebase.google.com/docs/firestore/query-data/listen
 
     const unSub = onSnapshot(doc(database, "userchats", currentUser.id), async (response) => {
 
-      if (!response.exists()) { //ADDED
-        console.log("No user chats found");
-        setChats([]);
-        return;
-      }
-
         const items = response.data().chats;
+        
 
         const promises = items.map(async (item) => {
+          
           if (!item || !item.receiverId) { //ADDED
             console.warn("Invalid chat item:", item);
             return null;
@@ -49,22 +40,20 @@ const Chatlist = () => {
           }
 
           const user = userDocSnap.data();
-
+         
           return { ...item, user }; }
           catch (err) { //ADDED
-            console.error(`Error fetching user ${item.receiverId}:`, err);
+            console.error(`Error fetching user ${item.receiverId} at index ${index}:`, err);
             return null;
           }
         });
 
         const chatData = await Promise.all(promises);
+       
         const validChats = chatData.filter(Boolean); //ADDED 
-
-        setChats(validChats.sort((a, b) => b.updatedAt - a.updatedAt));
-      }, (error) => {
-        console.error("Error in onSnapshot:", error);
-      }
-    );
+       
+        setChats(validChats.sort((a, b) => b.updatedAt - a.updatedAt)); //Changed chatData -> validChats
+      });
 
     return () => {
       unSub();
@@ -101,7 +90,7 @@ const Chatlist = () => {
             className="focus:outline-none block bg-black/35 text-white border-none w-full rounded-md border-0 py-1.5 pl-7 pr-2 placeholder:text-gray-700 group-hover:placeholder:text-gray-800 focus:placeholder:text-gray-800 sm:text-sm sm:leading-6"
           />
         </div>
-        <button // People add Icon
+        <button // Add Friends Button
           className="rounded-md hover:bg-black/45 group bg-black/35 content-center justify-center w-9 h-9 flex-none flex items-center"
           onClick={() => setAddMode((prev) => !prev)}
         >
