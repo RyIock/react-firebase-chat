@@ -10,11 +10,16 @@ import {
 import { database } from "../../lib/Firebase";
 import useChatStore from "../../lib/chatStore";
 import useUserStore from "../../lib/userStore";
+import upload from "../../lib/upload";
 
 const Chat = () => {
   const [chat, setChat] = useState();
   const [open, setOpen] = useState(false); //Open and Close Emoji Picker
   const [text, setText] = useState(""); //Adds Emoji's to Textbox
+  const [img, setImg] = useState({
+    file: null,
+    url: "",
+  });
 
   const { chatId, user } = useChatStore();
   const currentUser = useUserStore((state) => state.currentUser);
@@ -41,15 +46,32 @@ const Chat = () => {
     setText((prev) => prev + e.emoji);
   };
 
+  const handleImg = (e) => {
+    if (e.target.files[0]) {
+      setImg({
+        file: e.target.files[0],
+        url: URL.createObjectURL(e.target.files[0]),
+      });
+    }
+  };
+
   const handleSend = async () => {
     if (text === "") return;
 
+    let imgUrl = null
+
     try {
+
+      if(img.file){
+        imgUrl = await upload(img.file);
+      }
+
       await updateDoc(doc(database, "chats", chatId), {
         messages: arrayUnion({
           senderId: currentUser.id,
           text,
           createdAt: new Date(),
+          ...(imgUrl && {img: imgUrl}),
         }),
       });
 
@@ -67,7 +89,8 @@ const Chat = () => {
           );
 
           userChatsData.chats[chatIndex].lastMessage = text;
-          userChatsData.chats[chatIndex].isSeen = id === currentUser.id ? true : false; //
+          userChatsData.chats[chatIndex].isSeen =
+            id === currentUser.id ? true : false; //
           userChatsData.chats[chatIndex].updatedAt = Date.now();
 
           await updateDoc(userChatsRef, {
@@ -78,6 +101,15 @@ const Chat = () => {
     } catch (err) {
       console.log(err);
     }
+
+
+    setImg({
+      file: null,
+      url: "",
+    })
+
+    setText("")
+
   };
 
   return (
@@ -157,6 +189,8 @@ const Chat = () => {
           </div>
         ))}
 
+        
+
         <div className="message">
           <img
             src="src\assets\avatar.png"
@@ -180,18 +214,21 @@ const Chat = () => {
         className="flex items-center justify-between border-t-2 border-[#18405f] shadow-lg"
       >
         <div className="flex *:size-6 gap-1 p-2">
-          <svg //image
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="currentColor"
-            className="size-6"
-          >
-            <path
-              fillRule="evenodd"
-              d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
-              clipRule="evenodd"
-            />
-          </svg>
+          <input type="file" id="file" className=" hidden" onChange={handleImg} />
+          <label htmlFor="file">
+            <svg //image
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              className="size-6"
+            >
+              <path
+                fillRule="evenodd"
+                d="M1.5 6a2.25 2.25 0 0 1 2.25-2.25h16.5A2.25 2.25 0 0 1 22.5 6v12a2.25 2.25 0 0 1-2.25 2.25H3.75A2.25 2.25 0 0 1 1.5 18V6ZM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0 0 21 18v-1.94l-2.69-2.689a1.5 1.5 0 0 0-2.12 0l-.88.879.97.97a.75.75 0 1 1-1.06 1.06l-5.16-5.159a1.5 1.5 0 0 0-2.12 0L3 16.061Zm10.125-7.81a1.125 1.125 0 1 1 2.25 0 1.125 1.125 0 0 1-2.25 0Z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </label>
           <svg //microphone
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
