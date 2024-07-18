@@ -3,23 +3,23 @@ import { database } from "../../../lib/Firebase";
 import { useState } from "react";
 import useUserStore from "../../../lib/userStore";
 
-const AddUser = ({ onUserAdded /* Added */ }) => {
+const AddUser = () => {
 
     const currentUser = useUserStore((state) => state.currentUser);
     //const {currentUser} = useUserStore();
     
     const [user, setUser] = useState(null)
 
-    const handleSearch = async e =>{
+    const handleSearch = async (e) =>{
      e.preventDefault()
         const formData = new FormData(e.target);
         const username = formData.get("username");
 
-        try{ // https://firebase.google.com/docs/firestore/query-data/queries
+        try{ // https://firebase.google.com/docs/firestore/query-data/queries 2:17:41
             const userRef = collection(database,"users");
 
 
-            const q = query(userRef, where("username", "==", username));
+            const q = query(userRef, where("username", "==", username)); //No validation on same usernames yet. Fix.
 
             const querySnapShot = await getDocs(q);
 
@@ -47,11 +47,11 @@ const AddUser = ({ onUserAdded /* Added */ }) => {
             });
 
             await updateDoc(doc(userChatsRef , user.id),{
-                chats:arrayUnion({
+                chats:arrayUnion({ 
                     chatId: newChatRef.id,
                     lastMessage:"",
                     receiverId: currentUser.id,
-                    updatedAt: Date.now(),
+                    updatedAt: Date.now(), //serverTimestamp doesnt work with arrayUnion??
                 })
             });
 
@@ -66,12 +66,7 @@ const AddUser = ({ onUserAdded /* Added */ }) => {
             
             console.log(newChatRef.id)
 
-            onUserAdded({ //ADDED
-                chatId: newChatRef.id,
-                lastMessage: "",
-                username: user.username,
-                avatar: user.avatar || "src/assets/avatar.png"
-            });
+            
         } catch (err) {
             console.log(err)
         }

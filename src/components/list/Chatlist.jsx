@@ -1,19 +1,17 @@
 import React, { useEffect, useState } from "react";
 import AddUser from "./addUser/addUser";
 import useUserStore from "../../lib/userStore";
-import { doc, getDoc, onSnapshot } from "firebase/firestore";
+import { doc, getDoc, onSnapshot, updateDoc } from "firebase/firestore";
 import { database } from "../../lib/Firebase";
+import useChatStore from "../../lib/chatStore";
 
 const Chatlist = () => {
   const [addMode, setAddMode] = useState(false); 
   const [chats, setChats] = useState([]);
 
-  const handleUserAdded = (newChat) => { //Added
-    setChats(prevChats => [...prevChats, newChat]);
-    setAddMode(false);
-  };
 
   const currentUser  = useUserStore((state) => state.currentUser); //Obtain the zustand state managed "useUserStore"
+  const {chatId, changeChat}  = useChatStore();
   //const { currentUser } = useUserStore();
 
 
@@ -21,7 +19,7 @@ const Chatlist = () => {
 
     const unSub = onSnapshot(doc(database, "userchats", currentUser.id), async (response) => {
 
-        const items = response.data().chats;
+        const items = response.data()?.chats;
         
 
         const promises = items.map(async (item) => {
@@ -59,6 +57,37 @@ const Chatlist = () => {
       unSub();
     };
   }, [currentUser.id]); 
+
+  const handleSelect = async (chat) =>{ //selecting chat in Chatlist
+    
+   const userChats = chats.map(item=>{
+    const {user, ...rest} = item;
+
+    return rest;
+
+   });
+
+   const chatIndex = userChats.findIndex(item=>item.chatId === chat.chatId)
+
+   userChats[chatIndex].isSeen = true;
+   const userChatRef = doc(database, "userchats", currentUser.id);
+
+   try {
+    
+
+    await updateDoc(userChatRef, {
+      chats: userChats,
+    });
+    changeChat(chat.chatId, chat.user)
+   } catch (error) {
+    console.log(error)
+   }
+
+  
+    
+
+  }
+
 
   return (
     <div className="flex flex-col h-full overflow-hidden rounded-bl-xl">
@@ -116,17 +145,17 @@ const Chatlist = () => {
         className="overflow-auto *:flex *:items-center *:gap-6 *:p-2 *:cursor-pointer *:border-b-2 *:border-[#18405f]"
       >
         {chats.map((chat) => (
-          <div className="" key={chat.chatId}>
-            <img src="src\assets\avatar.png" className="h-10 rounded-full" />
+          <div data-isseen={chat?.isSeen ? "true" : "false"} className=" data-[isseen=false]:bg-sky-500" key={chat.chatId} onClick={() => handleSelect(chat)}>
+            <img src={chat.user.avatar || "src\assets\avatar.png"} className="h-10 rounded-full" />
             <div className="texts">
-              <span className="text-base font-semibold">Adam Doe</span>
+              <span className="text-base font-semibold">{chat.user.username}</span>
               <p className="text-sm">{chat.lastMessage || "No messages"}</p>
             </div>
           </div>
         ))}
       </div>
       {addMode ? (
-        <AddUser onUserAdded={handleUserAdded} />
+        <AddUser />
       ) : (
         <button className="text-sm" onClick={() => setAddMode(true)}>Add User +</button>
       )}

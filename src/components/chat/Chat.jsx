@@ -1,20 +1,85 @@
 import React, { Component, useEffect, useRef, useState } from "react";
 import EmojiPicker from "emoji-picker-react";
+import {
+  arrayUnion,
+  doc,
+  getDoc,
+  onSnapshot,
+  updateDoc,
+} from "firebase/firestore";
+import { database } from "../../lib/Firebase";
+import useChatStore from "../../lib/chatStore";
+import useUserStore from "../../lib/userStore";
 
 const Chat = () => {
+  const [chat, setChat] = useState();
   const [open, setOpen] = useState(false); //Open and Close Emoji Picker
   const [text, setText] = useState(""); //Adds Emoji's to Textbox
- 
-  const endRef = useRef(null)
 
-  useEffect(()=>{
-    endRef.current?.scrollIntoView({behavior:"smooth"})
-  })
+  const { chatId, user } = useChatStore();
+  const currentUser = useUserStore((state) => state.currentUser);
+
+  const endRef = useRef(null);
+
+  useEffect(() => {
+    //Autosmooth to bottom of Chat
+    endRef.current?.scrollIntoView({ behavior: "smooth" });
+  });
+
+  useEffect(() => {
+    //setChat useEffect (fetch chat)
+    const unSub = onSnapshot(doc(database, "chats", chatId), (res) => {
+      setChat(res.data());
+    });
+
+    return () => {
+      unSub();
+    };
+  }, [chatId]);
 
   const handleEmoji = (e) => {
     setText((prev) => prev + e.emoji);
-    
   };
+
+  const handleSend = async () => {
+    if (text === "") return;
+
+    try {
+      await updateDoc(doc(database, "chats", chatId), {
+        messages: arrayUnion({
+          senderId: currentUser.id,
+          text,
+          createdAt: new Date(),
+        }),
+      });
+
+      const userIDs = [currentUser.id, user];
+
+      userIDs.forEach(async (id) => {
+        const userChatsRef = doc(database, "userchats", id);
+        const userChatSnapshot = await getDoc(userChatsRef);
+
+        if (userChatSnapshot.exists()) {
+          const userChatsData = userChatSnapshot.data();
+
+          const chatIndex = userChatsData.chats.findIndex(
+            (c) => c.chatId === chatId
+          );
+
+          userChatsData.chats[chatIndex].lastMessage = text;
+          userChatsData.chats[chatIndex].isSeen = id === currentUser.id ? true : false; //
+          userChatsData.chats[chatIndex].updatedAt = Date.now();
+
+          await updateDoc(userChatsRef, {
+            chats: userChatsData.chats,
+          });
+        }
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   return (
     <div className="flex flex-col flex-auto border-l-2 border-[#18405f]">
       <div //Top Bar
@@ -71,46 +136,45 @@ const Chat = () => {
         </div>
       </div>
 
-
       <div // Center
         className="flex flex-col flex-1 overflow-scroll gap-5 *:max-w-[70%] *:flex *:gap-5"
       >
-        <div className="self-end ">
+        {chat?.messages?.map((message) => (
+          <div className="self-end " key={message?.createAt}>
             <div className="texts mt-5 mr-5">
-                <img src="src\assets\Headshot_Square.png" alt="" className="w-full h-72 object-cover rounded-lg mb-1" />
-                <p className="bg-sky-300 p-4 rounded-md shadow-sm">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dolorum aperiam illo vitae fuga ea culpa recusandae. Expedita id dolor neque qui quis, dolore nobis ullam eveniet sint dicta ex natus.</p>
-                <span className="text-xs ">1 min ago</span>
+              {message.img && (
+                <img
+                  src={message.img}
+                  alt=""
+                  className="w-full h-72 object-cover rounded-lg mb-1"
+                />
+              )}
+              <p className="bg-sky-300 p-4 rounded-md shadow-sm">
+                {message.text}
+              </p>
+              {/* {<span className="text-xs ">{message}</span>} */}
             </div>
-        </div>
+          </div>
+        ))}
 
         <div className="message">
-            <img src="src\assets\avatar.png" alt="" className="size-8 rounded-full object-cover ml-4 " />
-            <div className="texts">
-                <p className="p-4 rounded-md  bg-black/25 shadow-sm">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dolorum aperiam illo vitae fuga ea culpa recusandae. Expedita id dolor neque qui quis, dolore nobis ullam eveniet sint dicta ex natus.</p>
-                <span className="text-xs ">1 min ago</span>
-            </div>
+          <img
+            src="src\assets\avatar.png"
+            alt=""
+            className="size-8 rounded-full object-cover ml-4 "
+          />
+          <div className="texts">
+            <p className="p-4 rounded-md  bg-black/25 shadow-sm">
+              Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dolorum
+              aperiam illo vitae fuga ea culpa recusandae. Expedita id dolor
+              neque qui quis, dolore nobis ullam eveniet sint dicta ex natus.
+            </p>
+            <span className="text-xs ">1 min ago</span>
+          </div>
         </div>
 
-        <div className="self-end ">
-            <div className="texts mt-5 mr-5">
-                <p className="bg-sky-300 p-4 rounded-md shadow-sm">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dolorum aperiam illo vitae fuga ea culpa recusandae. Expedita id dolor neque qui quis, dolore nobis ullam eveniet sint dicta ex natus.</p>
-                <span className="text-xs ">1 min ago</span>
-            </div>
-        </div>
-
-        <div className="message">
-            <img src="src\assets\avatar.png" alt="" className="size-8 rounded-full object-cover ml-4 " />
-            <div className="texts">
-                <p className="p-4 rounded-md  bg-black/25 shadow-sm">Lorem ipsum dolor sit, amet consectetur adipisicing elit. Dolorum aperiam illo vitae fuga ea culpa recusandae. Expedita id dolor neque qui quis, dolore nobis ullam eveniet sint dicta ex natus.</p>
-                <span className="text-xs ">1 min ago</span>
-            </div>
-        </div>
-        
         <div ref={endRef} className="end"></div>
-
       </div>
-
-
 
       <div //Bottom Bar
         className="flex items-center justify-between border-t-2 border-[#18405f] shadow-lg"
@@ -186,7 +250,10 @@ const Chat = () => {
             />
           </div>
         </div>
-        <button className="mx-3 py-1 px-3 rounded-md shadow-sm text-sm font-semibold bg-sky-600 hover:bg-sky-500">
+        <button
+          onClick={handleSend}
+          className="mx-3 py-1 px-3 rounded-md shadow-sm text-sm font-semibold bg-sky-600 hover:bg-sky-500"
+        >
           Send
         </button>
       </div>
