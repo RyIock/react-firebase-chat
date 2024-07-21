@@ -56,11 +56,13 @@ const Chat = () => {
   };
 
   const handleSend = async () => {
-    if (text === "") return;
+    if (text === "" && !img.file) return;
 
-    let imgUrl = null
+   
 
-    try {
+    try { 
+      
+      let imgUrl = null
 
       if(img.file){
         imgUrl = await upload(img.file);
@@ -75,14 +77,14 @@ const Chat = () => {
         }),
       });
 
-      const userIDs = [currentUser.id, user];
-
-      userIDs.forEach(async (id) => {
+      const userIDs = [currentUser.id, user.id];
+//For both of the current user and the user you're messaging update their shared chat.
+      userIDs.forEach(async (id) => { 
         const userChatsRef = doc(database, "userchats", id);
         const userChatSnapshot = await getDoc(userChatsRef);
 
         if (userChatSnapshot.exists()) {
-          const userChatsData = userChatSnapshot.data();
+          const userChatsData = userChatSnapshot.data(); 
 
           const chatIndex = userChatsData.chats.findIndex(
             (c) => c.chatId === chatId
@@ -90,7 +92,7 @@ const Chat = () => {
 
           userChatsData.chats[chatIndex].lastMessage = text;
           userChatsData.chats[chatIndex].isSeen =
-            id === currentUser.id ? true : false; //
+            id === currentUser.id ? true : false; // if you're the sender you've seen it, else you havent.
           userChatsData.chats[chatIndex].updatedAt = Date.now();
 
           await updateDoc(userChatsRef, {
@@ -171,8 +173,10 @@ const Chat = () => {
       <div // Center
         className="flex flex-col flex-1 overflow-scroll gap-5 *:max-w-[70%] *:flex *:gap-5"
       >
+
+
         {chat?.messages?.map((message) => (
-          <div className="self-end " key={message?.createAt}>
+          <div className="self-end " key={message?.createdAt}>
             <div className="texts mt-5 mr-5">
               {message.img && (
                 <img
@@ -189,9 +193,20 @@ const Chat = () => {
           </div>
         ))}
 
-        
+            {img.url && (  //IMAGE MESSAGE 
+              <div className="self-end " >
+               <div className="texts mt-5 mr-5">
+              
+                <img
+                  src={img.url}
+                  alt=""
+                  className="w-full h-72 object-cover rounded-lg mb-1"
+                />
+            </div>
+          </div>
+        )}
 
-        <div className="message">
+        {/* <div className="message">
           <img
             src="src\assets\avatar.png"
             alt=""
@@ -205,7 +220,7 @@ const Chat = () => {
             </p>
             <span className="text-xs ">1 min ago</span>
           </div>
-        </div>
+        </div> */}
 
         <div ref={endRef} className="end"></div>
       </div>

@@ -11,7 +11,7 @@ const useChatStore = create((set) => ({
   changeChat: (chatId, user) => {
     const currentUser = useUserStore.getState().currentUser;
     //Check if current user is bloocked
-
+    
     if (user.blocked.includes(currentUser.id)) {
       return set({
         chatId,
