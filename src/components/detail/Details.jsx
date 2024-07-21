@@ -1,18 +1,44 @@
 import React, { Component } from "react";
-import { auth } from "../../lib/Firebase"; // Used to logout.
+import { auth, database } from "../../lib/Firebase"; // Used to logout.
+import useUserStore from "../../lib/userStore";
+import useChatStore from "../../lib/chatStore";
+import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
 
-class Details extends Component {
-  state = {};
-  render() {
+const Details = () => {
+    const { chatId, user, isCurrentUserBlocked, isReceiverBlocked, changeBlock } = useChatStore();
+
+    const { currentUser } = useUserStore();
+
+
+  const handleBlock = async () => {
+    console.log("Blocking.")
+    if(!user){
+      return;
+    }
+
+    const userDocRef =  doc(database, "users", currentUser.id)
+
+    try{
+      await updateDoc(userDocRef, {
+        blocked: isReceiverBlocked ? arrayRemove(user.id) : arrayUnion(user.id),
+      });
+      changeBlock()
+    }
+    catch(err){
+      console.warn(err)
+    }
+  }
+
+
     return (
       <div className="flex-col basis-1/4 min-w-52 hidden lg:flex border-l-2 border-[#18405f]">
         <div className="p-2 pt-5 flex flex-col items-center gap-3 border-b-2 border-[#18405f]">
           <img
-            src="src\assets\avatar.png"
+            src={user?.avatar || "src/assets/avatar.png"}
             alt=""
             className="size-14 rounded-full"
           />
-          <h2 className="font-bold">Jane Doe</h2>
+          <h2 className="font-bold">{user?.username}</h2>
           <p className="text-xs font-semibold flex-auto">
             Lorem ipsum dolor sit amet consectetur adipisicing elit
           </p>
@@ -200,12 +226,16 @@ class Details extends Component {
               </svg>
             </div>
           </div>
-        <button className="bg-red-500/50 hover:bg-red-900 rounded-md font-bold text-center py-1 mt-auto">Block User</button>
+
+
+        <button onClick={handleBlock} className="bg-red-500/50 hover:bg-red-900 rounded-md font-bold text-center py-1 mt-auto">
+        {isCurrentUserBlocked ? "You are Blocked!" : isReceiverBlocked ? "User Blocked" : "Block User"}
+        </button>
         <button onClick={()=>auth.signOut()} className="bg-sky-400/50 hover:bg-sky-900 rounded-md font-bold text-center py-1">Logout</button>
         </div>
       </div>
     );
-  }
+
 }
 
 export default Details;

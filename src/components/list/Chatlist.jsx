@@ -155,7 +155,7 @@ const Chatlist = () => {
         ))}
       </div>
       {addMode ? (
-        <AddUser />
+        <AddUser set={setAddMode}/>
       ) : (
         <button className="text-sm" onClick={() => setAddMode(true)}>Add User +</button>
       )}

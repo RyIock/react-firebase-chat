@@ -16,12 +16,12 @@ const Chat = () => {
   const [chat, setChat] = useState();
   const [open, setOpen] = useState(false); //Open and Close Emoji Picker
   const [text, setText] = useState(""); //Adds Emoji's to Textbox
-  const [img, setImg] = useState({
+  const [img, setImg] = useState({ //send images in chat
     file: null,
     url: "",
   });
 
-  const { chatId, user } = useChatStore();
+  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } = useChatStore();
   const currentUser = useUserStore((state) => state.currentUser);
 
   const endRef = useRef(null);
@@ -121,16 +121,16 @@ const Chat = () => {
       >
         <div className="flex items-center gap-4 p-4">
           <img
-            src="src\assets\avatar.png"
+            src={user.avatar || "src\assets\avatar.png"}
             alt=""
             className="size-16 rounded-full"
           />
           <div //Contact Name & Desc
             className="flex flex-col gap-0"
           >
-            <span className="font-bold text-lg">Jane Doe</span>
+            <span className="font-bold text-lg">{user.username}</span>
             <p className="text-sm text-gray-400">
-              Lorem, ipsum dolor sit amet.
+              {user.email}
             </p>
           </div>
         </div>
@@ -176,7 +176,7 @@ const Chat = () => {
 
 
         {chat?.messages?.map((message) => (
-          <div className="self-end " key={message?.createdAt}>
+          <div className={message.senderId === currentUser?.id ? "self-end " : "*:*:bg-black/25 pl-2"} key={message?.createdAt}>
             <div className="texts mt-5 mr-5">
               {message.img && (
                 <img
@@ -270,6 +270,7 @@ const Chat = () => {
         <input
           type="text"
           value={text}
+          disabled={isCurrentUserBlocked || isReceiverBlocked}
           onChange={(e) => setText(e.target.value)}
           placeholder="Type a message..."
           className="bg-black/35 flex-1 border-none outline-none focus:outline-none text-white rounded-lg p-1 pl-3 m-2 placeholder:text-gray-700 group-hover:placeholder:text-gray-800 focus:placeholder:text-gray-800 sm:text-sm sm:leading-6"
@@ -304,7 +305,8 @@ const Chat = () => {
         </div>
         <button
           onClick={handleSend}
-          className="mx-3 py-1 px-3 rounded-md shadow-sm text-sm font-semibold bg-sky-600 hover:bg-sky-500"
+          className="mx-3 py-1 px-3 rounded-md shadow-sm text-sm font-semibold bg-sky-600 hover:bg-sky-500 disabled:text-gray-400 disabled:bg-gray-700/50"
+          disabled={isCurrentUserBlocked || isReceiverBlocked}
         >
           Send
         </button>
