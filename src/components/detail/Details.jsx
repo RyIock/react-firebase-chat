@@ -8,6 +8,8 @@ const Details = () => {
 
     const { currentUser } = useUserStore();
 
+    
+    
 
   const handleBlock = async () => {
     console.log("Blocking.")

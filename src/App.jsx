@@ -32,13 +32,13 @@ const App = () => {
 
 
   if (isLoading) return( 
-    <div className="flex items-center justify-center bg-gradient-to-t from-[#08203e] to-[#557c93] h-dvh w-dvw">
-  <div className="p-20 text-lg bg-black/50 rounded-md">Loading...</div>
+    <div className="flex h-dvh w-dvw items-center justify-center bg-gradient-to-t from-[#08203e] to-[#557c93]">
+  <div className="rounded-md bg-black/50 p-20 text-lg">Loading...</div>
     </div>  );
 
   return (
-    <div className="flex items-center justify-center bg-gradient-to-t from-[#08203e] to-[#557c93] h-dvh w-dvw">
-      <div className="h-5/6 w-5/6 max-w-full min-w-[40rem] mx-8 min-h-[500px] bg-black/50 backdrop-blur-md backdrop-saturate-200 rounded-xl shadow-lg flex">
+    <div className="flex h-dvh w-dvw items-center justify-center bg-gradient-to-t from-[#08203e] to-[#557c93]">
+      <div className="sm:mx-8 flex h-full sm:h-5/6 sm:min-h-[500px] sm:w-5/6 w-full sm:min-w-[40rem] max-w-full rounded-xl bg-black/50 shadow-lg backdrop-blur-md backdrop-saturate-200">
         {currentUser ? (
           <>
             <List/>

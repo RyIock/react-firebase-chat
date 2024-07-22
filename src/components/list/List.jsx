@@ -7,7 +7,7 @@ class List extends Component {
     state = {  } 
     render() { 
         return (
-            <div className="basis-60 flex flex-none flex-col h-full">
+            <div className="basis-60 sm:flex flex-none flex-col h-full hidden">
                 <Userinfo/>
                 <Chatlist/>
             </div>
