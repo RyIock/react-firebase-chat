@@ -6,88 +6,89 @@ import { database } from "../../lib/Firebase";
 import useChatStore from "../../lib/chatStore";
 
 const Chatlist = () => {
-  const [addMode, setAddMode] = useState(false); 
+  const [addMode, setAddMode] = useState(false);
   const [chats, setChats] = useState([]);
+  const [search, setSearch] = useState("");
 
-
-  const currentUser  = useUserStore((state) => state.currentUser); //Obtain the zustand state managed "useUserStore"
-  const {chatId, changeChat}  = useChatStore();
+  const currentUser = useUserStore((state) => state.currentUser); //Obtain the zustand state managed "useUserStore"
+  const { chatId, changeChat } = useChatStore();
   //const { currentUser } = useUserStore();
 
+  useEffect(() => {
+    //  https://firebase.google.com/docs/firestore/query-data/listen
 
-  useEffect(() => { //  https://firebase.google.com/docs/firestore/query-data/listen
-
-    const unSub = onSnapshot(doc(database, "userchats", currentUser.id), async (response) => {
-
+    const unSub = onSnapshot(
+      doc(database, "userchats", currentUser.id),
+      async (response) => {
         const items = response.data()?.chats;
-        
 
         const promises = items.map(async (item) => {
-          
-          if (!item || !item.receiverId) { //ADDED
-            console.warn("Invalid chat item:", item);
-            return null;
-          }
-          try{ //ADDED
-          const userDocRef = doc(database, "users", item.receiverId); // https://firebase.google.com/docs/firestore/query-data/get-data
-          const userDocSnap = await getDoc(userDocRef);
+          try {
+            //ADDED
+            const userDocRef = doc(database, "users", item.receiverId); // https://firebase.google.com/docs/firestore/query-data/get-data
+            const userDocSnap = await getDoc(userDocRef);
 
-          if (!userDocSnap.exists()) { //ADDED
-            console.warn(`User ${item.receiverId} not found`);
-            return null;
-          }
+            if (!userDocSnap.exists()) {
+              //ADDED
+              console.warn(`User ${item.receiverId} not found`);
+              return null;
+            }
 
-          const user = userDocSnap.data();
-         
-          return { ...item, user }; }
-          catch (err) { //ADDED
-            console.error(`Error fetching user ${item.receiverId} at index ${index}:`, err);
+            const user = userDocSnap.data();
+
+            return { ...item, user };
+          } catch (err) {
+            //ADDED
+            console.error(
+              `Error fetching user ${item.receiverId} at index ${index}:`,
+              err
+            );
             return null;
           }
         });
 
         const chatData = await Promise.all(promises);
-       
-        const validChats = chatData.filter(Boolean); //ADDED 
-       
+
+        const validChats = chatData.filter(Boolean); //ADDED
+
         setChats(validChats.sort((a, b) => b.updatedAt - a.updatedAt)); //Changed chatData -> validChats
-      });
+      }
+    );
 
     return () => {
       unSub();
     };
-  }, [currentUser.id]); 
+  }, [currentUser.id]);
 
-  const handleSelect = async (chat) =>{ //selecting chat in Chatlist
-    
-   const userChats = chats.map(item=>{
-    const {user, ...rest} = item;
+  const handleSelect = async (chat) => {
+    //selecting chat in Chatlist
 
-    return rest;
+    const userChats = chats.map((item) => {
+      const { user, ...rest } = item;
 
-   });
-
-   const chatIndex = userChats.findIndex(item=>item.chatId === chat.chatId)
-
-   userChats[chatIndex].isSeen = true;
-   const userChatRef = doc(database, "userchats", currentUser.id);
-
-   try {
-    
-
-    await updateDoc(userChatRef, {
-      chats: userChats,
+      return rest;
     });
-    changeChat(chat.chatId, chat.user)
-   } catch (error) {
-    console.log(error)
-   }
 
-  
-    
+    const chatIndex = userChats.findIndex(
+      (item) => item.chatId === chat.chatId
+    );
 
-  }
+    userChats[chatIndex].isSeen = true;
+    const userChatRef = doc(database, "userchats", currentUser.id);
 
+    try {
+      await updateDoc(userChatRef, {
+        chats: userChats,
+      });
+      changeChat(chat.chatId, chat.user);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const filteredChats = chats.filter((c) =>
+    c.user.username.toLowerCase().includes(search.toLowerCase())
+  );
 
   return (
     <div className="flex flex-col h-full overflow-hidden rounded-bl-xl">
@@ -116,6 +117,7 @@ const Chatlist = () => {
             name="search"
             type="text"
             placeholder="Search"
+            onChange={(e) => setSearch(e.target.value)}
             className="focus:outline-none block bg-black/35 text-white border-none w-full rounded-md border-0 py-1.5 pl-7 pr-2 placeholder:text-gray-700 group-hover:placeholder:text-gray-800 focus:placeholder:text-gray-800 sm:text-sm sm:leading-6"
           />
         </div>
@@ -144,20 +146,32 @@ const Chatlist = () => {
       <div // Friends List
         className="overflow-auto *:flex *:items-center *:gap-6 *:p-2 *:cursor-pointer *:border-b-2 *:border-[#18405f]"
       >
-        {chats.map((chat) => (
-          <div data-isseen={chat?.isSeen ? "true" : "false"} className=" data-[isseen=false]:bg-sky-500" key={chat.chatId} onClick={() => handleSelect(chat)}>
-            <img src={chat.user.avatar || "src\assets\avatar.png"} className="h-10 rounded-full" />
+        {filteredChats.map((chat) => (
+          <div
+            data-isseen={chat?.isSeen ? "true" : "false"}
+            className=" data-[isseen=false]:bg-sky-500"
+            key={chat.chatId}
+            onClick={() => handleSelect(chat)}
+          >
+            <img
+              src={chat.user?.avatar || "src/assets/avatar.png"}
+              className="h-10 rounded-full"
+            />
             <div className="texts">
-              <span className="text-base font-semibold">{chat.user.username}</span>
+              <span className="text-base font-semibold">
+                {chat.user.username}
+              </span>
               <p className="text-sm">{chat.lastMessage || "No messages"}</p>
             </div>
           </div>
         ))}
       </div>
       {addMode ? (
-        <AddUser set={setAddMode}/>
+        <AddUser set={setAddMode} />
       ) : (
-        <button className="text-sm" onClick={() => setAddMode(true)}>Add User +</button>
+        <button className="text-sm" onClick={() => setAddMode(true)}>
+          Add User +
+        </button>
       )}
     </div>
   );

@@ -3,12 +3,12 @@ import useUserStore from "../../lib/userStore";
 
 const Userinfo = () => {
 
-    const {currentUser } = useUserStore();
+    const {currentUser} = useUserStore();
   return (
     <div className="">
       <div className="flex items-center p-4">
         <img
-          src={currentUser.avatar || "src/assets/Headshot_Square.png"}
+          src={currentUser?.avatar || "src/assets/Headshot_Square.png"}
           alt=""
           className="h-10 w-10 flex-none rounded-xl"
         />

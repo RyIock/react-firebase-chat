@@ -1,11 +1,10 @@
-import React, { Component } from "react";
 import { auth, database } from "../../lib/Firebase"; // Used to logout.
 import useUserStore from "../../lib/userStore";
 import useChatStore from "../../lib/chatStore";
 import { arrayRemove, arrayUnion, doc, updateDoc } from "firebase/firestore";
 
 const Details = () => {
-    const { chatId, user, isCurrentUserBlocked, isReceiverBlocked, changeBlock } = useChatStore();
+    const { chatId, user, isCurrentUserBlocked, isReceiverUserBlocked, changeBlock } = useChatStore();
 
     const { currentUser } = useUserStore();
 
@@ -20,12 +19,12 @@ const Details = () => {
 
     try{
       await updateDoc(userDocRef, {
-        blocked: isReceiverBlocked ? arrayRemove(user.id) : arrayUnion(user.id),
+        blocked: isReceiverUserBlocked ? arrayRemove(user.id) : arrayUnion(user.id),
       });
       changeBlock()
     }
     catch(err){
-      console.warn(err)
+      console.log(err)
     }
   }
 
@@ -38,9 +37,9 @@ const Details = () => {
             alt=""
             className="size-14 rounded-full"
           />
-          <h2 className="font-bold">{user?.username}</h2>
+          <h2 className="font-bold">{user?.username || 'Unavailable User' }</h2>
           <p className="text-xs font-semibold flex-auto">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit
+            {user?.email}
           </p>
         </div>
         <div className="overflow-auto p-2 flex flex-col gap-4 grow *:*:flex *:*:items-center *:*:justify-between *:*:px-1">
@@ -228,8 +227,8 @@ const Details = () => {
           </div>
 
 
-        <button onClick={handleBlock} className="bg-red-500/50 hover:bg-red-900 rounded-md font-bold text-center py-1 mt-auto">
-        {isCurrentUserBlocked ? "You are Blocked!" : isReceiverBlocked ? "User Blocked" : "Block User"}
+        <button onClick={handleBlock} disabled={isCurrentUserBlocked} className={"disabled:bg-black/50 disabled:cursor-not-allowed bg-red-500/50 hover:bg-red-900 rounded-md font-bold text-center py-1 mt-auto"}>
+        {isCurrentUserBlocked ? "You are Blocked!" : isReceiverUserBlocked ? "User Blocked" : "Block User"}
         </button>
         <button onClick={()=>auth.signOut()} className="bg-sky-400/50 hover:bg-sky-900 rounded-md font-bold text-center py-1">Logout</button>
         </div>

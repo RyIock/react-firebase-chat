@@ -21,7 +21,7 @@ const Chat = () => {
     url: "",
   });
 
-  const { chatId, user, isCurrentUserBlocked, isReceiverBlocked } = useChatStore();
+  const { chatId, user, isCurrentUserBlocked, isReceiverUserBlocked } = useChatStore();
   const currentUser = useUserStore((state) => state.currentUser);
 
   const endRef = useRef(null);
@@ -32,8 +32,9 @@ const Chat = () => {
   });
 
   useEffect(() => {
-    //setChat useEffect (fetch chat)
-    const unSub = onSnapshot(doc(database, "chats", chatId), (res) => {
+    //https://firebase.google.com/docs/firestore/query-data/listen
+    // This cool function onSnapshot, allows me to listen to a document thats on the database, when the database updated then 
+    const unSub = onSnapshot(doc(database, "chats", chatId), (res) => { //this listens if the contents of chatId changes
       setChat(res.data());
     });
 
@@ -78,7 +79,7 @@ const Chat = () => {
       });
 
       const userIDs = [currentUser.id, user.id];
-//For both of the current user and the user you're messaging update their shared chat.
+    //For both of the current user and the user you're messaging update their shared chat.
       userIDs.forEach(async (id) => { 
         const userChatsRef = doc(database, "userchats", id);
         const userChatSnapshot = await getDoc(userChatsRef);
@@ -121,16 +122,16 @@ const Chat = () => {
       >
         <div className="flex items-center gap-4 p-4">
           <img
-            src={user.avatar || "src\assets\avatar.png"}
+            src={user?.avatar || "src/assets/avatar.png"}
             alt=""
             className="size-16 rounded-full"
           />
           <div //Contact Name & Desc
             className="flex flex-col gap-0"
           >
-            <span className="font-bold text-lg">{user.username}</span>
+            <span className="font-bold text-lg">{user?.username || 'Unavailable User' }</span>
             <p className="text-sm text-gray-400">
-              {user.email}
+              {user?.email}
             </p>
           </div>
         </div>
@@ -208,7 +209,7 @@ const Chat = () => {
 
         {/* <div className="message">
           <img
-            src="src\assets\avatar.png"
+            src="src/assets/avatar.png"
             alt=""
             className="size-8 rounded-full object-cover ml-4 "
           />
@@ -270,10 +271,10 @@ const Chat = () => {
         <input
           type="text"
           value={text}
-          disabled={isCurrentUserBlocked || isReceiverBlocked}
+          disabled={isCurrentUserBlocked || isReceiverUserBlocked}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Type a message..."
-          className="bg-black/35 flex-1 border-none outline-none focus:outline-none text-white rounded-lg p-1 pl-3 m-2 placeholder:text-gray-700 group-hover:placeholder:text-gray-800 focus:placeholder:text-gray-800 sm:text-sm sm:leading-6"
+          placeholder={(isCurrentUserBlocked || isReceiverUserBlocked) ? 'You cannot chat with this user...' : 'Type a message...' }
+          className="bg-black/35 flex-1 disabled:cursor-not-allowed border-none outline-none focus:outline-none text-white rounded-lg p-1 pl-3 m-2 placeholder:text-gray-700 group-hover:placeholder:text-gray-800 focus:placeholder:text-gray-800 sm:text-sm sm:leading-6"
         />
         <div //emoji and Emoji Onlick
           className="*:size-6 relative"
@@ -306,7 +307,7 @@ const Chat = () => {
         <button
           onClick={handleSend}
           className="mx-3 py-1 px-3 rounded-md shadow-sm text-sm font-semibold bg-sky-600 hover:bg-sky-500 disabled:text-gray-400 disabled:bg-gray-700/50"
-          disabled={isCurrentUserBlocked || isReceiverBlocked}
+          disabled={isCurrentUserBlocked || isReceiverUserBlocked}
         >
           Send
         </button>
